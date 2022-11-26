@@ -1,17 +1,21 @@
 package com.doooogh.config;
 
-import com.doooogh.filters.JwtAuthenticationTokenFilter;
+import com.doooogh.filters.PasswordLoginFilter;
+import com.doooogh.handlers.*;
+import com.doooogh.service.CusUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -30,14 +34,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
 
-    @Bean
-    // 自定义的password编码
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Autowired
-    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    private CusUserDetailsService cusUserDetailsService;
+
+    @Autowired
+    private UserLoginSuccessHandler userLoginSuccessHandler;
+    @Autowired
+    private UserLoginFailureHandler userLoginFailureHandler;
+
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+
 
 
 
@@ -60,10 +68,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                //关闭csrf
+                //关闭csrf    使用jwt不需要csrf
                 .csrf().disable().httpBasic()
                 .and()
-                //不通过Session获取SecurityContext
+                //Spring Security将绝对不会创建session，无状态架构适用于REST API
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
@@ -83,23 +91,46 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
-        //自定义过滤器
-        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-/*        http.exceptionHandling()
+        //登录设置
+        http.oauth2Login().successHandler(userLoginSuccessHandler).failureHandler(userLoginFailureHandler)
+                        .and()
+       .logout().addLogoutHandler(new UserLogoutSuccessHandler())
+                .and()
+        //自定义过滤器
+                .addFilterBefore(new PasswordLoginFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+        http.exceptionHandling()
                 //配置认证失败
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler);*/
+                .authenticationEntryPoint(new NoAuthenticationHandler())  //无权限
+                .accessDeniedHandler(new NoAccessHandler());  //无权限
 
         //允许跨域
         http.cors();
     }
 
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(cusUserDetailsService).passwordEncoder(new DefaultPasswordEncoder());
+    }
+
+
+
+    /**
+     * 将AuthenticationManager作为对象注入容器
+     */
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
+
+    @Bean
+    public TokenStore tokenStore(){
+        return new RedisTokenStore(redisConnectionFactory);
+    }
+
     /**
      *  跨域支持
      * @return CorsConfigurationSource

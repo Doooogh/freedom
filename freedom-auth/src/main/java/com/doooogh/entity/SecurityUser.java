@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Li m13283354149@163.com
@@ -25,11 +26,12 @@ public class SecurityUser implements UserDetails {
     //状态
     private String status;
 
-    private List<SysRole> roleList;
-
+    private List<String> roleList;
 
 
     public SecurityUser(SysUser sysUser) {
+        this.userId = sysUser.getId();
+        this.roleList = sysUser.getRoleList().stream().map(SysRole::getCode).collect(Collectors.toList());
     }
 
     @Override

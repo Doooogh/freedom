@@ -1,6 +1,5 @@
 package com.doooogh.handlers;
 
-import com.doooogh.common.systemmanagement.entity.SysRole;
 import com.doooogh.common.systemmanagement.enums.SysUserStatusEnum;
 import com.doooogh.entity.SecurityUser;
 import com.doooogh.enums.AuthEnum;
@@ -54,9 +53,9 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         // 角色集合
         Set<GrantedAuthority> authorities = new HashSet<>();
         // 查询用户角色
-        List<SysRole> roleList = userInfo.getRoleList();
-        for (SysRole sysRoleEntity : roleList) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + sysRoleEntity.getCode()));
+        List<String> roleList = userInfo.getRoleList();
+        for (String roleCode : roleList) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + roleCode));
         }
         // 进行登录
         return new UsernamePasswordAuthenticationToken(userInfo, password, authorities);

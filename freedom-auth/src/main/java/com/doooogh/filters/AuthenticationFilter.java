@@ -1,32 +1,34 @@
 package com.doooogh.filters;
 
+import cn.hutool.core.util.StrUtil;
 import com.doooogh.servers.redis.utils.RedisUtil;
 import com.doooogh.utils.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Li m13283354149@163.com
- * @description:
+ * @description: 授权过滤器
  * @date 2022/9/2
  */
-@Component
 @Slf4j
-public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
+public class AuthenticationFilter extends BasicAuthenticationFilter {
 
 
     @Value("${jwt.tokenHeader}")
@@ -39,21 +41,37 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     private RedisUtil redisService;
 
+    private AuthenticationManager authenticationManager;
+
+    public AuthenticationFilter(AuthenticationManager authenticationManager) {
+        super(authenticationManager);
+        this.authenticationManager=authenticationManager;
+
+
+    }
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 获取token
         String authHeader = request.getHeader(this.tokenHeader);
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith(this.tokenHead)) {
-            String authToken = authHeader.substring(this.tokenHead.length());// The part after "Bearer "
+        if (StrUtil.isNotEmpty(authHeader) && authHeader.startsWith(this.tokenHead)) {
+            // The part after "Bearer "
+            String authToken = authHeader.substring(this.tokenHead.length());
             String username = jwtTokenUtil.getUserNameFromToken(authToken);
-
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // 从redis从获取
-                UserDetails userDetails = (UserDetails) this.redisService.get(username);
-                if (userDetails != null && jwtTokenUtil.validateToken(authToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                String redisToken = (String) this.redisService.get(username);
+                if (StrUtil.isNotEmpty(redisToken) && jwtTokenUtil.validateToken(authToken, redisToken)) {
+                    List<String> userAuthorities = jwtTokenUtil.getUserAuthorities(redisToken);
+                    List<GrantedAuthority> authority = new ArrayList<>();
+                    for (String permissionValue : userAuthorities) {
+                        SimpleGrantedAuthority auth = new SimpleGrantedAuthority(permissionValue);
+                        authority.add(auth);
+                    }
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, authority);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    log.info("authenticated user:{}", username);
+                    log.info("authenticate success user:{}", username);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }

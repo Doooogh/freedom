@@ -51,4 +51,8 @@ public class Result<T> {
         return new Result(ResultEnum.ERROR.getCode(), message, null);
     }
 
+    public static Result error(ResultEnum resultEnum) {
+        return new Result(resultEnum.getCode(), resultEnum.getMessage(), null);
+    }
+
 }
