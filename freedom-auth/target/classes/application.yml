@@ -1,9 +1,0 @@
-server:
-  port: 8110
-
-
-jwt:
-  tokenHeader: tokenHeader
-  tokenHead: tokenHead
-  secret: secret
-  expiration: 10

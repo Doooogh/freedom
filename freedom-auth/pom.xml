@@ -8,73 +8,14 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>freedom-auth</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>freedom-auth</name>
     <description>认证服务</description>
+    <modules>
+        <module>freedom-auth-biz</module>
+        <module>freedom-auth-boot</module>
+        <module>freedom-auth-api</module>
+    </modules>
 
-    <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!--nacos discovery依赖-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-
-        <!--spring security的依赖-->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-security</artifactId>
-            <version>${spring-cloud-security.version}</version>
-        </dependency>
-        <!--OAuth2的依赖-->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-oauth2</artifactId>
-            <version>${spring-cloud-oauth2.version}</version>
-        </dependency>
-
-        <!--JWT(Json Web Token)登录支持-->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>${jwt.version}</version>
-        </dependency>
-
-<!--        servlet-->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.doooogh</groupId>
-            <artifactId>freedom-server-redis</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.doooogh</groupId>
-            <artifactId>freedom-common-pojo-system-management</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-    </dependencies>
 
 </project>

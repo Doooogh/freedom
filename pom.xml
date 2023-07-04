@@ -13,8 +13,6 @@
         <module>freedom-auth</module>
         <module>freedom-common</module>
         <module>freedom-servers</module>
-        <module>freedom-servers/freedom-server-redis</module>
-        <module>freedom-servers/freedom-server-mybatis</module>
         <module>freedom-system-management</module>
     </modules>
 
@@ -55,6 +53,21 @@
                 <artifactId>freedom-common-pojo-system-management</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.doooogh</groupId>
+                <artifactId>freedom-auth-biz</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.doooogh</groupId>
+                <artifactId>freedom-auth-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
