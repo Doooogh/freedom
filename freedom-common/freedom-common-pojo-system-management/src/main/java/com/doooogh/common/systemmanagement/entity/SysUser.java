@@ -24,10 +24,10 @@ public class SysUser extends BaseDateEntity {
 
     private String email;
 
-    private String mobileNumber;
+    private String mobile;
 
     //状态
-    private String status;
+    private String userStatus;
 
     private String englishName;
 

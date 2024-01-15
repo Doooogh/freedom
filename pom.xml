@@ -66,6 +66,18 @@
                 <version>${project.version}</version>
             </dependency>
 
+<!--            system-management-->
+            <dependency>
+                <groupId>com.doooogh</groupId>
+                <artifactId>freedom-system-management-biz</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.doooogh</groupId>
+                <artifactId>freedom-system-management-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
 
 
             <dependency>
@@ -136,7 +148,8 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+<!--                <version>2.5</version>-->
+                                <version>${servlet-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

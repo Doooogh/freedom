@@ -16,4 +16,6 @@ public class SysRole extends BaseDateEntity {
 
     private String code;
 
+    private String description;
+
 }

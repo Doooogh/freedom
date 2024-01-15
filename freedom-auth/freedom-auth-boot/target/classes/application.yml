@@ -1,2 +1,24 @@
 server:
   port: 8110
+  servlet:
+    context-path: /auth
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://freedom-system-management-db:3306/freedom-system-management?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Admin123
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    worker-id: ${random.int(1,31)}
+    datacenter-id: ${random.int(1,31)}
+  mapper-locations: classpath*:/xml/**/*.xml

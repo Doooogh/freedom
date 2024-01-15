@@ -7,21 +7,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>freedom-system-management</artifactId>
-    <packaging>jar</packaging>
     <name>freedom-system</name>
     <description>系统服务</description>
-    <dependencies>
-        <dependency>
-            <groupId>com.doooogh</groupId>
-            <artifactId>freedom-server-mybatis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.doooogh</groupId>
-            <artifactId>freedom-common-pojo-system-management</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-    </dependencies>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>freedom-system-management-biz</module>
+        <module>freedom-system-management-boot</module>
+        <module>freedom-system-management-api</module> 
+    </modules>
 </project>

@@ -16,10 +16,5 @@
             <groupId>com.doooogh</groupId>
             <artifactId>freedom-common-publicused</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-annotation</artifactId>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 </project>
