@@ -1,13 +1,16 @@
 package com.doooogh.freedom.auth.biz.config;
 
 import com.doooogh.freedom.auth.biz.filter.CusClientCredentialsTokenEndpointFilter;
+import com.doooogh.freedom.auth.biz.point.CusAuthenticationEntryPoint;
 import com.doooogh.freedom.auth.biz.point.CusWebResponseExceptionTranslator;
+import com.doooogh.freedom.auth.biz.service.CusUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -38,7 +41,6 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
     private ClientDetailsService clientDetailsService;
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -52,6 +54,8 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private OAuth2AuthenticationEntryPoint oAuth2AuthenticationEntryPoint;
 
+    @Autowired
+    private CusUserDetailService cusUserDetailService;
 
 
     @Override
@@ -91,13 +95,21 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
         return service;
     }
 
+
+    //密码编码器
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints
-                .accessTokenConverter(accessTokenConverter)
                 .authenticationManager(authenticationManager)//认证管理器
-                .authorizationCodeServices(authorizationCodeServices())//授权码服务
+                .userDetailsService(cusUserDetailService)
                 .tokenServices(tokenService())//令牌管理服务
+                .accessTokenConverter(accessTokenConverter)
+                .authorizationCodeServices(authorizationCodeServices())//授权码服务
                 //设置异常WebResponseExceptionTranslator  用于处理用户名密码 授权类型不正确异常
                 .exceptionTranslator(cusWebResponseExceptionTranslator)
                 .allowedTokenEndpointRequestMethods(HttpMethod.POST);
@@ -105,24 +117,20 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        CusClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter = new CusClientCredentialsTokenEndpointFilter(security,oAuth2AuthenticationEntryPoint);
+        CusClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter = new CusClientCredentialsTokenEndpointFilter(security, oAuth2AuthenticationEntryPoint);
         clientCredentialsTokenEndpointFilter.afterPropertiesSet();
         security.addTokenEndpointAuthenticationFilter(clientCredentialsTokenEndpointFilter);
         security
+                .passwordEncoder(passwordEncoder())
                 .tokenKeyAccess("permitAll()")                    //oauth/token_key是公开
                 .checkTokenAccess("permitAll()")                  //oauth/check_token公开
                 //这里不能加 allowFormAuthenticationForClients
 //                一旦设置了 allowFormAuthenticationForClients 为true，则会创建 ClientCredentialsTokenEndpointFilter，此时自定义的自然失效了。
 //                .allowFormAuthenticationForClients()
-                .authenticationEntryPoint(oAuth2AuthenticationEntryPoint)
+                .authenticationEntryPoint(new CusAuthenticationEntryPoint()) //认证失败处理
         ;
         //表单认证（申请令牌）
     }
 
 
-
-
-
-
-
-}
+} 
